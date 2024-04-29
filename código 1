@@ -1,0 +1,69 @@
+PImage img; // La imagen que se utilizará para el rompecabezas
+int cols, rows; // Número de columnas y filas en el rompecabezas
+int tileSize = 100; // Tamaño de cada cuadrado del rompecabezas
+int[][] pieces; // Arreglo para almacenar la posición de cada pieza
+int emptyCol, emptyRow; // Columna y fila de la pieza vacía
+
+void setup() {
+  size(600, 600);
+  img = loadImage("tu_imagen.jpg"); // Reemplaza "tu_imagen.jpg" con la ruta de tu imagen
+  img.resize(600, 600);
+  cols = width / tileSize;
+  rows = height / tileSize;
+  pieces = new int[cols][rows];
+  shufflePieces();
+}
+
+void draw() {
+  background(255);
+  displayPieces();
+}
+
+void shufflePieces() {
+  // Llena el arreglo pieces en orden
+  for (int y = 0; y < rows; y++) {
+    for (int x = 0; x < cols; x++) {
+      pieces[x][y] = y * cols + x;
+    }
+  }
+  // Mezcla las posiciones de las piezas
+  for (int i = 0; i < 1000; i++) {
+    int randDir = int(random(4));
+    movePiece(emptyCol + (randDir == 0 ? -1 : (randDir == 1 ? 1 : 0)), emptyRow + (randDir == 2 ? -1 : (randDir == 3 ? 1 : 0)));
+  }
+}
+
+void displayPieces() {
+  // Muestra cada pieza de la imagen
+  for (int y = 0; y < rows; y++) {
+    for (int x = 0; x < cols; x++) {
+      int index = pieces[x][y];
+      if (index != -1) {
+        int sx = index % cols * tileSize;
+        int sy = index / cols * tileSize;
+        image(img, x * tileSize, y * tileSize, tileSize, tileSize, sx, sy, tileSize, tileSize);
+      }
+    }
+  }
+}
+
+void mousePressed() {
+  int clickedCol = mouseX / tileSize;
+  int clickedRow = mouseY / tileSize;
+  if (isValidMove(clickedCol, clickedRow)) {
+    movePiece(clickedCol, clickedRow);
+  }
+}
+
+boolean isValidMove(int targetCol, int targetRow) {
+  return (targetCol == emptyCol && abs(targetRow - emptyRow) == 1) || (targetRow == emptyRow && abs(targetCol - emptyCol) == 1);
+}
+
+void movePiece(int targetCol, int targetRow) {
+  if (targetCol >= 0 && targetCol < cols && targetRow >= 0 && targetRow < rows) {
+    pieces[emptyCol][emptyRow] = pieces[targetCol][targetRow];
+    pieces[targetCol][targetRow] = -1;
+    emptyCol = targetCol;
+    emptyRow = targetRow;
+  }
+}
